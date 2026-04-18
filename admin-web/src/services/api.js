@@ -1,4 +1,16 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
+function resolveApiBaseUrl() {
+  const envUrl = import.meta.env.VITE_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/$/, '');
+  }
+  // In dev, use same-origin `/api` so Vite proxies to the backend (see vite.config.js).
+  if (import.meta.env.DEV) {
+    return '/api';
+  }
+  return 'http://localhost:5000/api';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 async function request(path, { method = 'GET', data, token } = {}) {
   const headers = { 'Content-Type': 'application/json' };

@@ -1,7 +1,29 @@
 import axios from 'axios';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-const DEFAULT_BASE_URL = 'http://10.255.111.96:5000/api';
-const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL || DEFAULT_BASE_URL).replace(/\/$/, '');
+function resolveApiBaseUrl() {
+  const envUrl = process.env.EXPO_PUBLIC_API_URL?.trim();
+  if (envUrl) {
+    return envUrl.replace(/\/$/, '');
+  }
+
+  // In Expo Go, use the same host as Metro to avoid stale hardcoded IPs.
+  const hostUri = Constants.expoConfig?.hostUri;
+  const metroHost = hostUri ? hostUri.split(':')[0] : null;
+  if (metroHost) {
+    return `http://${metroHost}:5000/api`;
+  }
+
+  // Final local fallbacks for simulators/emulators.
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:5000/api';
+  }
+
+  return 'http://localhost:5000/api';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const client = axios.create({
   baseURL: API_BASE_URL,

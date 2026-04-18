@@ -45,7 +45,11 @@ export default function RegisterScreen({ navigation }) {
         password 
       });
     } catch (err) {
-      setError(err.response?.data?.error || err.message || 'Registration failed');
+      if (err.code === 'ECONNABORTED' || err.message === 'Network Error') {
+        setError('Cannot connect to server. Check backend is running and phone/PC are on same network.');
+      } else {
+        setError(err.response?.data?.error || err.message || 'Registration failed');
+      }
     } finally {
       setLoading(false);
     }
